@@ -8,3 +8,6 @@ dev-container:
 # 	docker run --gpus all -d -it --name dev -p 2221:22 -v "$$(pwd)":/home/dev/commbench $$(docker build -q .) && \
 # 	docker container list
 
+setup-chameleon-cuda2404-container:
+	sudo apt-get install -y libmpich-dev libopenmpi-dev
+	sudo apt-get install --no-install-recommends -y libnccl2=2.24.3-1+cuda12.6 libnccl-dev=2.24.3-1+cuda12.6
