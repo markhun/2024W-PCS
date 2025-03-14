@@ -10,4 +10,4 @@ dev-container:
 
 setup-chameleon-cuda2404-container:
 	sudo apt-get install -y libmpich-dev libopenmpi-dev
-	sudo apt-get install --no-install-recommends -y libnccl2=2.24.3-1+cuda12.6 libnccl-dev=2.24.3-1+cuda12.6
+	sudo apt-get install --no-install-recommends -y libnccl2 libnccl-dev

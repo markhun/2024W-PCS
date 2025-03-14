@@ -1,9 +1,13 @@
+RUN_DATETIME=$$(date +"%FT%T")
 # ----- Make Macros -----
 
 CC = mpicxx
+CCFLAGS = -O3 -std=c++14 -march=native
 
 NVCC = nvcc
-NVCCFLAGS = -lineinfo -O3 -std=c++14 -gencode arch=compute_80,code=sm_80 -ccbin=mpicxx -Xcompiler -fopenmp -Xptxas="-v" 
+# use arch=compute_60,code=sm_60 for NVIDIA Tesla P100
+# use arch=compute_80,code=sm_80 for NVIDIA RTX 4060
+NVCCFLAGS = -lineinfo -O3 -std=c++14 -gencode arch=compute_60,code=sm_60 -ccbin=mpicxx -Xcompiler -fopenmp -Xptxas="-v" 
 
 CFLAGS = -I/usr/local/cuda-12.6/targets/x86_64-linux/include
 
@@ -24,7 +28,7 @@ all:	$(TARGETS)
 	${NVCC} ${NVCCFLAGS} $< -c -o $@ ${CFLAGS}
 
 simple_mpi_nccl: $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LD_FLAGS)
+	$(CC) ${CCFLAGS} $(OBJECTS) -o $@ $(LD_FLAGS)
 
 clean:
 	rm -f $(TARGETS) *.o *.o.* *.bin core
@@ -33,4 +37,4 @@ clean-data:
 	rm -f data_*.csv
 
 local_run:
-	NCCL_DEBUG=WARN mpirun -np 1 simple_mpi_nccl 2>> data_$$(date +"%FT%T").csv
+	NCCL_DEBUG=WARN mpirun -np 2 simple_mpi_nccl 2>> data_$(RUN_DATETIME).csv | tee output_$(RUN_DATETIME).txt
