@@ -31,11 +31,11 @@ E.g. via executing `make clean; make simple_mpi_bounce_buffer` in `./simple_mpi_
     sudo firewall-cmd --runtime-to-permanent
 ```
 
-This will ensure local network connectivity within the shared network provided by Chamaleon Cloud.
+This will ensure local network connectivity within the shared network provided by Chameleon Cloud.
 
 ### 5. Set up the experiment parameters
 
-Modify the experiment's makefile with the correct values for `HOSTS` and `SLOTS`.  
+Modify the experiment's Makefile with the correct values for `HOSTS` and `SLOTS`.  
 `HOSTS` should contain a comma separated list of IP addresses of every node that should be part of the experiment (excluding the main node - localhost). `SLOTS` should contain the number of processes to start per node. This will most likely be the number of GPUs per node.
 
 ### 6. Execute the experiment
