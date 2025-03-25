@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <climits>
 #include <unistd.h>
 #include <iostream>
 
@@ -217,12 +218,7 @@ int main(int argc, char* argv[]) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     MPI_Comm_size(MPI_COMM_WORLD, &nRanks);
-     
-    // Get local rank (for multi-process per node)
-    int local_rank = 0;
-    char hostname[1024];
-    gethostname(hostname, 1024);
-    
+       
     // Set device to local rank
     // Each process outputs its local GPU setup
     int device_count;
@@ -239,6 +235,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Select GPU based on local rank (assuming one GPU per process)
+    int local_rank = 0;
     local_rank = myRank % device_count;
     CUDA_CHECK(cudaSetDevice(local_rank));
 
@@ -246,8 +243,11 @@ int main(int argc, char* argv[]) {
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, local_rank);
 
+    char hostname[HOST_NAME_MAX + 1];
+    gethostname(hostname, HOST_NAME_MAX + 1);
+
     std::cout << "Process " << myRank << " using GPU " << local_rank 
-                << " (" << prop.name << ")" << std::endl;
+              << " (" << prop.name << ") on node " << hostname << std::endl;
     
     // Initialize NCCL
     ncclUniqueId ncclId;
