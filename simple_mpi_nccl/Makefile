@@ -1,4 +1,9 @@
+HOSTS = 10.52.1.52  # Should be a comma-separated list of ip addr: 10.52.1.52,10.52.1.53,10.52.1.54
+SLOTS = 2
+HOSTS_AND_SLOTS = localhost:$(SLOTS),$(shell echo $(HOSTS) | sed 's/\([^,]*\)/\1:$(SLOTS)/g')
+
 RUN_DATETIME=$$(date +"%FT%T")
+
 # ----- Make Macros -----
 
 CC = mpicxx
@@ -36,5 +41,11 @@ clean:
 clean-data:
 	rm -f data_*.csv
 
-local_run:
+local_run: clean simple_mpi_nccl
 	NCCL_DEBUG=WARN mpirun -np 2 simple_mpi_nccl 2>> data_$(RUN_DATETIME).csv | tee output_$(RUN_DATETIME).txt
+
+distributed_run: clean simple_mpi_nccl
+	@echo "Copying compiled program to hosts ..."
+	clush -w ${HOSTS} -c ./simple_mpi_nccl
+	@echo "Starting run ..."
+	mpirun --host localhost:${NO_OF_SLOTS},${HOSTS_AND_SLOTS} --mca mpi_preconnect_all true ~/2024W-PCS/simple_mpi_nccl/simple_mpi_nccl 2>> data_$(RUN_DATETIME).csv | tee output_$(RUN_DATETIME).txt
