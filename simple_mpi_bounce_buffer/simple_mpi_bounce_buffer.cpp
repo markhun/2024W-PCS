@@ -1,4 +1,7 @@
 #include <iostream>
+#include <climits>
+#include <unistd.h>
+
 #include <cuda_runtime.h>
 #include <mpi.h>
 
@@ -213,8 +216,11 @@ int main(int argc, char** argv) {
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, local_rank);
     
+    char hostname[HOST_NAME_MAX + 1];
+    gethostname(hostname, HOST_NAME_MAX + 1);
+
     std::cout << "Process " << mpi_rank << " using GPU " << local_rank 
-              << " (" << prop.name << ")" << std::endl;
+              << " (" << prop.name << ") on node " << hostname << std::endl;
     
     // Allocate host memory (pinned for faster transfers)
     int* hostArray = nullptr;
