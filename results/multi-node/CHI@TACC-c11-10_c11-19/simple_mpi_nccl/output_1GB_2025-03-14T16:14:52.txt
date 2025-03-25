@@ -1,0 +1,424 @@
+Running with 4 MPI processes
+Memory allocation details:
+  - Total size: 1 GiB (1073741824 bytes)
+  - Element size: 4 bytes
+  - Number of elements: 268435456
+  - Number of GPUs on node: 2
+Process 1 using GPU 1 (Tesla P100-PCIE-16GB) on node hunner-tuwien-ccl-two-nodes-1
+Process 0 using GPU 0 (Tesla P100-PCIE-16GB) on node hunner-tuwien-ccl-two-nodes-1
+Process 2 using GPU 0 (Tesla P100-PCIE-16GB) on node hunner-tuwien-ccl-two-nodes-2
+Process 3 using GPU 1 (Tesla P100-PCIE-16GB) on node hunner-tuwien-ccl-two-nodes-2
+ncclCommInitRank completed
+ncclCommInitRank completed
+ncclCommInitRank completed
+Allocated DeviceBuffer
+ncclCommInitRank completed
+Allocated DeviceBuffer
+Initialization time: 197.395 ms
+Starting warmup run
+Initialized buffer with zeros on root node
+Allocated DeviceBuffer
+Rank 0: Starting broadcast
+Allocated DeviceBuffer
+Broadcast completed: 942.051 ms (GPU), 943.768 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 3: Processing data on GPU...
+Process 2: Processing data on GPU...
+AddOne kernel completed: 4.218 ms (GPU), 4.235 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Reduce completed: 922.496 ms (GPU), 922.505 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 942.051 ms
+  Wall Broadcast time: 0.943768 seconds
+  NCCL Kernel execution: 4.21814 ms
+  Wall Kernel execution: 0.00423547 seconds
+  NCCL Reduce operation: 922.496 ms
+  Wall Reduce operation: 0.922505 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting warmup run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.730 ms (GPU), 893.643 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 3: Processing data on GPU...
+Process 2: Processing data on GPU...
+AddOne kernel completed: 4.007 ms (GPU), 4.019 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 918.162 ms (GPU), 918.182 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.73 ms
+  Wall Broadcast time: 0.893643 seconds
+  NCCL Kernel execution: 4.00691 ms
+  Wall Kernel execution: 0.00401867 seconds
+  NCCL Reduce operation: 918.162 ms
+  Wall Reduce operation: 0.918182 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting warmup run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.741 ms (GPU), 893.584 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.014 ms (GPU), 4.026 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.510 ms (GPU), 917.527 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.741 ms
+  Wall Broadcast time: 0.893584 seconds
+  NCCL Kernel execution: 4.01373 ms
+  Wall Kernel execution: 0.00402601 seconds
+  NCCL Reduce operation: 917.51 ms
+  Wall Reduce operation: 0.917527 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting warmup run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.697 ms (GPU), 893.529 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.015 ms (GPU), 4.027 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.398 ms (GPU), 917.408 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.697 ms
+  Wall Broadcast time: 0.893529 seconds
+  NCCL Kernel execution: 4.01494 ms
+  Wall Kernel execution: 0.00402676 seconds
+  NCCL Reduce operation: 917.398 ms
+  Wall Reduce operation: 0.917408 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting warmup run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.765 ms (GPU), 893.636 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.031 ms (GPU), 4.044 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.199 ms (GPU), 917.208 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.765 ms
+  Wall Broadcast time: 0.893636 seconds
+  NCCL Kernel execution: 4.03107 ms
+  Wall Kernel execution: 0.00404355 seconds
+  NCCL Reduce operation: 917.199 ms
+  Wall Reduce operation: 0.917208 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.723 ms (GPU), 893.625 ms (wall)
+Process 0: Processing data on GPU...
+Process 1: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.006 ms (GPU), 4.018 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.159 ms (GPU), 917.177 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.723 ms
+  Wall Broadcast time: 0.893625 seconds
+  NCCL Kernel execution: 4.00634 ms
+  Wall Kernel execution: 0.00401828 seconds
+  NCCL Reduce operation: 917.159 ms
+  Wall Reduce operation: 0.917177 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.743 ms (GPU), 893.586 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.013 ms (GPU), 4.025 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.181 ms (GPU), 917.191 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.743 ms
+  Wall Broadcast time: 0.893586 seconds
+  NCCL Kernel execution: 4.01334 ms
+  Wall Kernel execution: 0.00402549 seconds
+  NCCL Reduce operation: 917.181 ms
+  Wall Reduce operation: 0.917191 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.717 ms (GPU), 893.623 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.006 ms (GPU), 4.019 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.140 ms (GPU), 917.151 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.717 ms
+  Wall Broadcast time: 0.893623 seconds
+  NCCL Kernel execution: 4.00614 ms
+  Wall Kernel execution: 0.00401911 seconds
+  NCCL Reduce operation: 917.14 ms
+  Wall Reduce operation: 0.917151 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.778 ms (GPU), 893.695 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.032 ms (GPU), 4.044 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.176 ms (GPU), 917.185 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.778 ms
+  Wall Broadcast time: 0.893695 seconds
+  NCCL Kernel execution: 4.03152 ms
+  Wall Kernel execution: 0.00404421 seconds
+  NCCL Reduce operation: 917.176 ms
+  Wall Reduce operation: 0.917185 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.720 ms (GPU), 893.626 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.006 ms (GPU), 4.017 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.237 ms (GPU), 917.246 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.72 ms
+  Wall Broadcast time: 0.893626 seconds
+  NCCL Kernel execution: 4.00586 ms
+  Wall Kernel execution: 0.00401705 seconds
+  NCCL Reduce operation: 917.237 ms
+  Wall Reduce operation: 0.917246 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.718 ms (GPU), 893.626 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.006 ms (GPU), 4.018 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.429 ms (GPU), 917.439 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.718 ms
+  Wall Broadcast time: 0.893626 seconds
+  NCCL Kernel execution: 4.00586 ms
+  Wall Kernel execution: 0.00401774 seconds
+  NCCL Reduce operation: 917.429 ms
+  Wall Reduce operation: 0.917439 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.783 ms (GPU), 893.696 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.030 ms (GPU), 4.042 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.467 ms (GPU), 917.477 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.783 ms
+  Wall Broadcast time: 0.893696 seconds
+  NCCL Kernel execution: 4.02973 ms
+  Wall Kernel execution: 0.0040418 seconds
+  NCCL Reduce operation: 917.467 ms
+  Wall Reduce operation: 0.917477 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.706 ms (GPU), 893.616 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.005 ms (GPU), 4.016 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.239 ms (GPU), 917.250 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.706 ms
+  Wall Broadcast time: 0.893616 seconds
+  NCCL Kernel execution: 4.00474 ms
+  Wall Kernel execution: 0.00401645 seconds
+  NCCL Reduce operation: 917.239 ms
+  Wall Reduce operation: 0.91725 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.736 ms (GPU), 893.644 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.004 ms (GPU), 4.015 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.450 ms (GPU), 917.459 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.736 ms
+  Wall Broadcast time: 0.893644 seconds
+  NCCL Kernel execution: 4.00352 ms
+  Wall Kernel execution: 0.00401542 seconds
+  NCCL Reduce operation: 917.45 ms
+  Wall Reduce operation: 0.917459 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
+Starting benchmark run
+Initialized buffer with zeros on root node
+Rank 0: Starting broadcast
+Broadcast completed: 891.727 ms (GPU), 893.637 ms (wall)
+Process 1: Processing data on GPU...
+Process 0: Processing data on GPU...
+Process 2: Processing data on GPU...
+Process 3: Processing data on GPU...
+AddOne kernel completed: 4.005 ms (GPU), 4.017 ms (wall)
+Process 1: Starting Reduce operation...
+Process 0: Starting Reduce operation...
+Process 2: Starting Reduce operation...
+Process 3: Starting Reduce operation...
+Reduce completed: 917.176 ms (GPU), 917.185 ms (wall)
+VERIFICATION PASSED: All checked elements equal to 4 (number of processes)
+Each element now equals 4 (1 from each of the 4 processes)
+
+Performance Summary (Rank 0):
+  NCCL Broadcast time: 891.727 ms
+  Wall Broadcast time: 0.893637 seconds
+  NCCL Kernel execution: 4.00451 ms
+  Wall Kernel execution: 0.00401714 seconds
+  NCCL Reduce operation: 917.176 ms
+  Wall Reduce operation: 0.917185 seconds
+  Total data size: 1 GiB (268435456 integers)
+
+------------------------------------------------------------------------
