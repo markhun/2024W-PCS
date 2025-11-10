@@ -71,4 +71,7 @@ The run will generate a measurement data file of the format `data_$(RUN_DATETIME
 
 ### 7. Inspect results
 
-Each experiment will write two text files. A file containing the measurement results in CSV format and a file containing the logging output of the run. Both files will contain the date and time of the run within their respective file names.
+Each experiment will write two text files. A file containing the measurement results in CSV format and a file containing the logging output of the run as a simple text file. Both files will contain the date and time of the run within their respective file names:
+
+- `data_$(RUN_DATETIME)`
+- `output_$(RUN_DATETIME).txt`
