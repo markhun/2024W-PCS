@@ -21,9 +21,9 @@ constexpr size_t TOTAL_ELEMENTS = TOTAL_BYTES / BYTES_PER_INT;
 void launchAddOneKernel(int* deviceArray, size_t numElements);
 
 
-int perform_experiment(int& mpi_rank, int& mpi_size, int* hostArray, int* resultArray, int* deviceArray, bool warmup) {
+int perform_experiment(int& mpiRank, int& mpiSize, int* hostBuffer, int* resultBuffer, int* deviceBuffer, bool warmup) {
     
-    if (mpi_rank == 0) {
+    if (mpiRank == 0) {
         if (warmup)
             printf("Starting warmup run\n");
         else
@@ -36,48 +36,48 @@ int perform_experiment(int& mpi_rank, int& mpi_size, int* hostArray, int* result
     
     // Broadcast the array from rank 0 to all other ranks
     double start_time = MPI_Wtime();
-    std::cout << "Process " << mpi_rank << ": Starting broadcast..." << std::endl;
+    std::cout << "Process " << mpiRank << ": Starting broadcast..." << std::endl;
     
-    MPI_Bcast(hostArray, TOTAL_ELEMENTS, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(hostBuffer, TOTAL_ELEMENTS, MPI_INT, 0, MPI_COMM_WORLD);
     
-    double broadcast_time = MPI_Wtime() - start_time;
-    std::cout << "Process " << mpi_rank << ": Broadcast completed in " 
-              << broadcast_time << " seconds" << std::endl;
+    double broadcastTime = MPI_Wtime() - start_time;
+    std::cout << "Process " << mpiRank << ": Broadcast completed in " 
+              << broadcastTime << " seconds" << std::endl;
         
     // Copy data from host to device
-    std::cout << "Process " << mpi_rank << ": Copying data to GPU..." << std::endl;
+    std::cout << "Process " << mpiRank << ": Copying data to GPU..." << std::endl;
     start_time = MPI_Wtime();
     
-    cudaError_t error = cudaMemcpy(deviceArray, hostArray, TOTAL_BYTES, cudaMemcpyHostToDevice);
+    cudaError_t error = cudaMemcpy(deviceBuffer, hostBuffer, TOTAL_BYTES, cudaMemcpyHostToDevice);
     if (error != cudaSuccess) {
-        std::cerr << "Process " << mpi_rank << ": Error copying to device: " 
+        std::cerr << "Process " << mpiRank << ": Error copying to device: " 
                   << cudaGetErrorString(error) << std::endl;
-        cudaFree(deviceArray);
-        cudaFreeHost(hostArray);
+        cudaFree(deviceBuffer);
+        cudaFreeHost(hostBuffer);
         MPI_Abort(MPI_COMM_WORLD, 1);
         return 1;
     }
     
-    double h2d_time = MPI_Wtime() - start_time;
-    std::cout << "Process " << mpi_rank << ": H2D transfer completed in " 
-              << h2d_time << " seconds" << std::endl;
+    double h2dTime = MPI_Wtime() - start_time;
+    std::cout << "Process " << mpiRank << ": H2D transfer completed in " 
+              << h2dTime << " seconds" << std::endl;
     
     // Launch kernel to add 1 to each element
-    std::cout << "Process " << mpi_rank << ": Processing data on GPU..." << std::endl;
+    std::cout << "Process " << mpiRank << ": Processing data on GPU..." << std::endl;
     
     // Start timing kernel execution
     start_time = MPI_Wtime();
     
     // Launch CUDA kernel
-    launchAddOneKernel(deviceArray, TOTAL_ELEMENTS);
+    launchAddOneKernel(deviceBuffer, TOTAL_ELEMENTS);
     
     // Check for kernel launch errors
     error = cudaGetLastError();
     if (error != cudaSuccess) {
-        std::cerr << "Process " << mpi_rank << ": Kernel launch error: " 
+        std::cerr << "Process " << mpiRank << ": Kernel launch error: " 
                   << cudaGetErrorString(error) << std::endl;
-        cudaFree(deviceArray);
-        cudaFreeHost(hostArray);
+        cudaFree(deviceBuffer);
+        cudaFreeHost(hostBuffer);
         MPI_Abort(MPI_COMM_WORLD, 1);
         return 1;
     }
@@ -85,59 +85,59 @@ int perform_experiment(int& mpi_rank, int& mpi_size, int* hostArray, int* result
     // Wait for kernel to finish
     error = cudaDeviceSynchronize();
     if (error != cudaSuccess) {
-        std::cerr << "Process " << mpi_rank << ": Kernel execution error: " 
+        std::cerr << "Process " << mpiRank << ": Kernel execution error: " 
                   << cudaGetErrorString(error) << std::endl;
-        cudaFree(deviceArray);
-        cudaFreeHost(hostArray);
+        cudaFree(deviceBuffer);
+        cudaFreeHost(hostBuffer);
         MPI_Abort(MPI_COMM_WORLD, 1);
         return 1;
     }
     
-    double kernel_time = MPI_Wtime() - start_time;
-    std::cout << "Process " << mpi_rank << ": Kernel execution completed in " 
-              << kernel_time << " seconds" << std::endl;
+    double kernelTime = MPI_Wtime() - start_time;
+    std::cout << "Process " << mpiRank << ": Kernel execution completed in " 
+              << kernelTime << " seconds" << std::endl;
     
     // Copy data back from device to host
-    std::cout << "Process " << mpi_rank << ": Copying data back to CPU..." << std::endl;
+    std::cout << "Process " << mpiRank << ": Copying data back to CPU..." << std::endl;
     start_time = MPI_Wtime();
     
-    error = cudaMemcpy(hostArray, deviceArray, TOTAL_BYTES, cudaMemcpyDeviceToHost);
+    error = cudaMemcpy(hostBuffer, deviceBuffer, TOTAL_BYTES, cudaMemcpyDeviceToHost);
     if (error != cudaSuccess) {
-        std::cerr << "Process " << mpi_rank << ": Error copying to host: " 
+        std::cerr << "Process " << mpiRank << ": Error copying to host: " 
                   << cudaGetErrorString(error) << std::endl;
-        cudaFree(deviceArray);
-        cudaFreeHost(hostArray);
+        cudaFree(deviceBuffer);
+        cudaFreeHost(hostBuffer);
         MPI_Abort(MPI_COMM_WORLD, 1);
         return 1;
     }
     
-    double d2h_time = MPI_Wtime() - start_time;
-    std::cout << "Process " << mpi_rank << ": D2H transfer completed in " 
-              << d2h_time << " seconds" << std::endl;
+    double d2hTime = MPI_Wtime() - start_time;
+    std::cout << "Process " << mpiRank << ": D2H transfer completed in " 
+              << d2hTime << " seconds" << std::endl;
     
     // Perform MPI_Reduce to sum the arrays at root process (rank 0)
-    std::cout << "Process " << mpi_rank << ": Starting Reduce operation..." << std::endl;
+    std::cout << "Process " << mpiRank << ": Starting Reduce operation..." << std::endl;
     start_time = MPI_Wtime();
     
     // Root process is 0
     const int root = 0;
-    MPI_Reduce(hostArray, resultArray, TOTAL_ELEMENTS, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
+    MPI_Reduce(hostBuffer, resultBuffer, TOTAL_ELEMENTS, MPI_INT, MPI_SUM, root, MPI_COMM_WORLD);
     
-    double reduce_time = MPI_Wtime() - start_time;
-    std::cout << "Process " << mpi_rank << ": Reduce completed in " 
-              << reduce_time << " seconds" << std::endl;
+    double reduceTime = MPI_Wtime() - start_time;
+    std::cout << "Process " << mpiRank << ": Reduce completed in " 
+              << reduceTime << " seconds" << std::endl;
     
     // Verify results on rank 0 only
-    if (mpi_rank == 0) {
+    if (mpiRank == 0) {
         std::cout << "Rank 0: Verifying results..." << std::endl;
         bool correct = true;
-        int expected_value = mpi_size; // Each process added 1, so we expect mpi_size
+        int expectedValue = mpiSize; // Each process added 1, so we expect mpiSize
         
         // Check first 10 elements
         for (int i = 0; i < 10 && i < TOTAL_ELEMENTS; i++) {
-            if (resultArray[i] != expected_value) {
+            if (resultBuffer[i] != expectedValue) {
                 std::cerr << "Verification failed at index " << i << ": Expected " 
-                          << expected_value << ", got " << resultArray[i] << std::endl;
+                          << expectedValue << ", got " << resultBuffer[i] << std::endl;
                 correct = false;
                 break;
             }
@@ -145,9 +145,9 @@ int perform_experiment(int& mpi_rank, int& mpi_size, int* hostArray, int* result
         
         // Check last 10 elements
         for (size_t i = TOTAL_ELEMENTS - 10; i < TOTAL_ELEMENTS; i++) {
-            if (resultArray[i] != expected_value) {
+            if (resultBuffer[i] != expectedValue) {
                 std::cerr << "Verification failed at index " << i << ": Expected " 
-                          << expected_value << ", got " << resultArray[i] << std::endl;
+                          << expectedValue << ", got " << resultBuffer[i] << std::endl;
                 correct = false;
                 break;
             }
@@ -155,31 +155,31 @@ int perform_experiment(int& mpi_rank, int& mpi_size, int* hostArray, int* result
         
         if (correct) {
             std::cout << "All checked elements verified correctly!" << std::endl;
-            std::cout << "Each element now equals " << expected_value 
-                      << " (1 from each of the " << mpi_size << " processes)" << std::endl;
+            std::cout << "Each element now equals " << expectedValue 
+                      << " (1 from each of the " << mpiSize << " processes)" << std::endl;
         }
         
         // Print performance summary
         std::cout << "\nPerformance Summary (Rank 0):" << std::endl;
-        std::cout << "  Broadcast time: " << broadcast_time << " seconds" << std::endl;
-        std::cout << "  Host->Device transfer: " << h2d_time << " seconds" << std::endl;
-        std::cout << "  Kernel execution: " << kernel_time << " seconds" << std::endl;
-        std::cout << "  Device->Host transfer: " << d2h_time << " seconds" << std::endl;
-        std::cout << "  Reduce operation: " << reduce_time << " seconds" << std::endl;
+        std::cout << "  Broadcast time: " << broadcastTime << " seconds" << std::endl;
+        std::cout << "  Host->Device transfer: " << h2dTime << " seconds" << std::endl;
+        std::cout << "  Kernel execution: " << kernelTime << " seconds" << std::endl;
+        std::cout << "  Device->Host transfer: " << d2hTime << " seconds" << std::endl;
+        std::cout << "  Reduce operation: " << reduceTime << " seconds" << std::endl;
         std::cout << "  Total data size: " << NUMBER_OF_GiB_TO_SEND << " GiB (" << TOTAL_ELEMENTS << " integers)" << std::endl;
         std::cout << std::endl;
 
         if (!warmup) {  // print CSV data to stderr
-            std::cerr << broadcast_time << "," << h2d_time << "," << kernel_time << "," << d2h_time << "," << reduce_time << "," << TOTAL_BYTES << std::endl; 
+            std::cerr << broadcastTime << "," << h2dTime << "," << kernelTime << "," << d2hTime << "," << reduceTime << "," << TOTAL_BYTES << std::endl; 
         }
 
         std::cout << "------------------------------------------------------------------------" << std::endl;
     }
 
 
-    std::cout << "Process " << mpi_rank << ": Reseting host array to zeros..." << std::endl;
+    std::cout << "Process " << mpiRank << ": Reseting host array to zeros..." << std::endl;
     for (size_t i = 0; i < TOTAL_ELEMENTS; i++) {
-        hostArray[i] = 0;
+        hostBuffer[i] = 0;
     }
 
 
@@ -189,76 +189,76 @@ int perform_experiment(int& mpi_rank, int& mpi_size, int* hostArray, int* result
 
 int main(int argc, char** argv) {
     // Initialize MPI
-    int mpi_rank, mpi_size;
+    int mpiRank, mpiSize;
     MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpiRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpiSize);
     
     // Each process outputs its local GPU setup
-    int device_count;
-    cudaGetDeviceCount(&device_count);
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
     
     // Only rank 0 prints general information
-    if (mpi_rank == 0) {
-        std::cout << "Running with " << mpi_size << " MPI processes" << std::endl;
+    if (mpiRank == 0) {
+        std::cout << "Running with " << mpiSize << " MPI processes" << std::endl;
         std::cout << "Memory allocation details:" << std::endl;
         std::cout << "  - Total size: " << NUMBER_OF_GiB_TO_SEND << " GiB (" << TOTAL_BYTES << " bytes)" << std::endl;
         std::cout << "  - Element size: " << BYTES_PER_INT << " bytes" << std::endl;
         std::cout << "  - Number of elements: " << TOTAL_ELEMENTS << std::endl;
-        std::cout << "  - Number of GPUs on node: " << device_count << std::endl;
+        std::cout << "  - Number of GPUs on node: " << deviceCount << std::endl;
     }
        
-    // Select GPU based on local rank (assuming one GPU per process)
-    int local_rank = mpi_rank % device_count;
-    cudaSetDevice(local_rank);
+    // Select GPU based on node-local rank (assuming one GPU per process)
+    int localRank = mpiRank % deviceCount;
+    cudaSetDevice(localRank);
     
     // Get GPU properties
     cudaDeviceProp prop;
-    cudaGetDeviceProperties(&prop, local_rank);
+    cudaGetDeviceProperties(&prop, localRank);
     
     char hostname[HOST_NAME_MAX + 1];
     gethostname(hostname, HOST_NAME_MAX + 1);
 
-    std::cout << "Process " << mpi_rank << " using GPU " << local_rank 
+    std::cout << "Process " << mpiRank << " using GPU " << localRank 
               << " (" << prop.name << ") on node " << hostname << std::endl;
     
     // Allocate host memory (pinned for faster transfers)
-    int* hostArray = nullptr;
-    cudaError_t error = cudaMallocHost(&hostArray, TOTAL_BYTES);
+    int* hostBuffer = nullptr;
+    cudaError_t error = cudaMallocHost(&hostBuffer, TOTAL_BYTES);
     if (error != cudaSuccess) {
-        std::cerr << "Process " << mpi_rank << ": Error allocating host memory: " 
+        std::cerr << "Process " << mpiRank << ": Error allocating host memory: " 
                   << cudaGetErrorString(error) << std::endl;
         MPI_Abort(MPI_COMM_WORLD, 1);
         return 1;
     }
 
     // Allocate device memory
-    int* deviceArray = nullptr;
-    error = cudaMalloc(&deviceArray, TOTAL_BYTES);
+    int* deviceBuffer = nullptr;
+    error = cudaMalloc(&deviceBuffer, TOTAL_BYTES);
     if (error != cudaSuccess) {
-        std::cerr << "Process " << mpi_rank << ": Error allocating device memory: " 
+        std::cerr << "Process " << mpiRank << ": Error allocating device memory: " 
                     << cudaGetErrorString(error) << std::endl;
-        cudaFreeHost(hostArray);
+        cudaFreeHost(hostBuffer);
         MPI_Abort(MPI_COMM_WORLD, 1);
         return 1;
     }
     
     // Initialize array on rank 0
-    if (mpi_rank == 0) {
+    if (mpiRank == 0) {
         std::cout << "Rank 0: Initializing array to zeros..." << std::endl;
         for (size_t i = 0; i < TOTAL_ELEMENTS; i++) {
-            hostArray[i] = 0;
+            hostBuffer[i] = 0;
         }
     }
 
     // Allocate buffer for the result on rank 0 only
-    int* resultArray = nullptr;
-    if (mpi_rank == 0) {
-        error = cudaMallocHost(&resultArray, TOTAL_BYTES);
+    int* resultBuffer = nullptr;
+    if (mpiRank == 0) {
+        error = cudaMallocHost(&resultBuffer, TOTAL_BYTES);
         if (error != cudaSuccess) {
-            std::cerr << "Process " << mpi_rank << ": Error allocating result buffer: " 
+            std::cerr << "Process " << mpiRank << ": Error allocating result buffer: " 
                         << cudaGetErrorString(error) << std::endl;
-            cudaFreeHost(hostArray);
+            cudaFreeHost(hostBuffer);
             MPI_Abort(MPI_COMM_WORLD, 1);
             return 1;
         }
@@ -266,30 +266,30 @@ int main(int argc, char** argv) {
 
     int retval = 0;
     for (int i = 0; i < NO_WARMUP_RUNS; i++) {
-        retval = perform_experiment(mpi_rank, mpi_size, hostArray, resultArray, deviceArray, true);
+        retval = perform_experiment(mpiRank, mpiSize, hostBuffer, resultBuffer, deviceBuffer, true);
         if (retval)
             return retval;
     }
     
     // write CSV header to stderr
-    if (mpi_rank == 0) {
+    if (mpiRank == 0) {
         std::cerr << "broadcast_s,h2d_transfer_s,kernel_execution_s,d2h_transfer_s,reduce_op_s,total_buffer_size_bytes" << std::endl; 
     }
 
     for (int i = 0; i < NO_EXPERIMENT_RUNS; i++) {
-        retval = perform_experiment(mpi_rank, mpi_size, hostArray, resultArray, deviceArray, false);
+        retval = perform_experiment(mpiRank, mpiSize, hostBuffer, resultBuffer, deviceBuffer, false);
         if (retval)
             return retval;
     }
 
-    if (mpi_rank == 0) {
+    if (mpiRank == 0) {
         // Free result array (only on rank 0)
-        cudaFreeHost(resultArray);
+        cudaFreeHost(resultBuffer);
     }
     
     // Free memory
-    cudaFree(deviceArray);
-    cudaFreeHost(hostArray);
+    cudaFree(deviceBuffer);
+    cudaFreeHost(hostBuffer);
     
     // Finalize MPI
     MPI_Finalize();

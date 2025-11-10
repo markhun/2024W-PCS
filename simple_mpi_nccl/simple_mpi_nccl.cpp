@@ -1,11 +1,12 @@
-#include <cuda_runtime.h>
-#include <nccl.h>
-#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <climits>
 #include <unistd.h>
 #include <iostream>
+
+#include <cuda_runtime.h>
+#include <nccl.h>
+#include <mpi.h>
 
 #define CUDA_CHECK(cmd) do {                         \
   cudaError_t err = cmd;                             \
@@ -41,13 +42,14 @@ constexpr size_t TOTAL_ELEMENTS = TOTAL_BYTES / BYTES_PER_INT;
 void launchAddOneKernel(int* deviceArray, size_t numElements);
 
 
-int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm, cudaStream_t& stream, bool warmup) {
+int perform_experiment(int& myRank, int& nRanks, int* deviceBuffer, ncclComm_t& comm, cudaStream_t& stream, bool warmup) {
     // Timing variables
     double start, stop;
+    float ncclBroadcastTimeMS, ncclKernelTimeMS, ncclReduceTimeMS;
+    
     cudaEvent_t startEvent, stopEvent;
     CUDA_CHECK(cudaEventCreate(&startEvent));
     CUDA_CHECK(cudaEventCreate(&stopEvent));
-    float nccl_broadcast_time_ms, nccl_kernel_time_ms, nccl_reduce_time_ms;
 
     if (myRank == 0) {
         if (warmup)
@@ -59,7 +61,7 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
 
     // Initialize array on rank 0
     if (myRank == 0) {
-        CUDA_CHECK(cudaMemset(d_buffer, 0, TOTAL_BYTES));
+        CUDA_CHECK(cudaMemset(deviceBuffer, 0, TOTAL_BYTES));
         printf("Initialized buffer with zeros on root node\n");
     }
 
@@ -72,8 +74,8 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
     CUDA_CHECK(cudaEventRecord(startEvent, stream));
     
     NCCL_CHECK(ncclBroadcast(
-        d_buffer,          // sendbuff
-        d_buffer,          // recvbuff
+        deviceBuffer,          // sendbuff
+        deviceBuffer,          // recvbuff
         TOTAL_ELEMENTS,    // count
         ncclInt,           // datatype
         0,                 // root
@@ -84,12 +86,12 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
     CUDA_CHECK(cudaStreamSynchronize(stream));
     CUDA_CHECK(cudaEventRecord(stopEvent, stream));
     CUDA_CHECK(cudaEventSynchronize(stopEvent));
-    CUDA_CHECK(cudaEventElapsedTime(&nccl_broadcast_time_ms, startEvent, stopEvent));
-    double broadcast_time = MPI_Wtime() - start;
+    CUDA_CHECK(cudaEventElapsedTime(&ncclBroadcastTimeMS, startEvent, stopEvent));
+    double broadcastTime = MPI_Wtime() - start;
     
     if (myRank == 0) {
         printf("Broadcast completed: %.3f ms (GPU), %.3f ms (wall)\n", 
-            nccl_broadcast_time_ms, broadcast_time*1000);
+            ncclBroadcastTimeMS, broadcastTime*1000);
     }
     
     // Execute AddOne kernel on each node's buffer
@@ -102,24 +104,24 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
     CUDA_CHECK(cudaEventRecord(startEvent, stream));
     
     // Launch CUDA kernel
-    launchAddOneKernel(d_buffer, TOTAL_ELEMENTS);
+    launchAddOneKernel(deviceBuffer, TOTAL_ELEMENTS);
     
     // Wait for kernel to complete and stop timing
     CUDA_CHECK(cudaStreamSynchronize(stream));
     CUDA_CHECK(cudaEventRecord(stopEvent, stream));
     CUDA_CHECK(cudaEventSynchronize(stopEvent));
-    CUDA_CHECK(cudaEventElapsedTime(&nccl_kernel_time_ms, startEvent, stopEvent));
-    double kernel_time = MPI_Wtime() - start;
+    CUDA_CHECK(cudaEventElapsedTime(&ncclKernelTimeMS, startEvent, stopEvent));
+    double kernelTime = MPI_Wtime() - start;
     
     if (myRank == 0) {
         printf("AddOne kernel completed: %.3f ms (GPU), %.3f ms (wall)\n", 
-            nccl_kernel_time_ms, kernel_time*1000);
+            ncclKernelTimeMS, kernelTime*1000);
     }
     
     // Allocate buffer on root node to receive gathered data
-    int *d_result = nullptr;
+    int *deviceResults = nullptr;
     if (myRank == 0) {
-        CUDA_CHECK(cudaMalloc(&d_result, TOTAL_BYTES));
+        CUDA_CHECK(cudaMalloc(&deviceResults, TOTAL_BYTES));
     }
     
     // Gather all data to root node
@@ -131,8 +133,8 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
     CUDA_CHECK(cudaEventRecord(startEvent, stream));
     
     NCCL_CHECK(ncclReduce(
-        d_buffer,          // sendbuff
-        d_result,          // recvbuff
+        deviceBuffer,          // sendbuff
+        deviceResults,          // recvbuff
         TOTAL_ELEMENTS,    // count
         ncclInt,           // datatype
         ncclSum,           // reduction operation
@@ -144,38 +146,38 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
     CUDA_CHECK(cudaStreamSynchronize(stream));
     CUDA_CHECK(cudaEventRecord(stopEvent, stream));
     CUDA_CHECK(cudaEventSynchronize(stopEvent));
-    CUDA_CHECK(cudaEventElapsedTime(&nccl_reduce_time_ms, startEvent, stopEvent));
-    double reduce_time = MPI_Wtime() - start;
+    CUDA_CHECK(cudaEventElapsedTime(&ncclReduceTimeMS, startEvent, stopEvent));
+    double reduceTime = MPI_Wtime() - start;
     
     if (myRank == 0) {
         printf("Reduce completed: %.3f ms (GPU), %.3f ms (wall)\n", 
-            nccl_reduce_time_ms, reduce_time*1000);
+            ncclReduceTimeMS, reduceTime*1000);
     }
     
     // Verify on root node
     if (myRank == 0) {
         // Number of elements to verify
-        const int verify_count = 1000;
+        const int verifyCount = 1000;
         
         // Allocate host memory for verification
-        int *h_result = (int*)malloc(sizeof(int) * verify_count);
-        CUDA_CHECK(cudaMemcpy(h_result, d_result, sizeof(int) * verify_count, cudaMemcpyDeviceToHost));
+        int *h_result = (int*)malloc(sizeof(int) * verifyCount);
+        CUDA_CHECK(cudaMemcpy(h_result, deviceResults, sizeof(int) * verifyCount, cudaMemcpyDeviceToHost));
         
         // Check if all elements equal the number of processes
-        bool verification_passed = true;
-        int expected_value = nRanks; // Each process added 1, so we expect mpi_size
-        for (int i = 0; i < verify_count; i++) {
-            if (h_result[i] != expected_value) {
+        bool verificationPassed = true;
+        int expectedValue = nRanks; // Each process added 1, so we expect mpi_size
+        for (int i = 0; i < verifyCount; i++) {
+            if (h_result[i] != expectedValue) {
                 printf("ERROR: Verification failed at index %d - expected %d but got %d\n", 
-                       i, expected_value, h_result[i]);
-                verification_passed = false;
+                       i, expectedValue, h_result[i]);
+                verificationPassed = false;
                 break;
             }
         }
         
-        if (verification_passed) {
-            printf("VERIFICATION PASSED: All checked elements equal to %d (number of processes)\n", expected_value);
-            std::cout << "Each element now equals " << expected_value 
+        if (verificationPassed) {
+            printf("VERIFICATION PASSED: All checked elements equal to %d (number of processes)\n", expectedValue);
+            std::cout << "Each element now equals " << expectedValue 
             << " (1 from each of the " << nRanks << " processes)" << std::endl;
 
             // Print the first 10 elements as sample output
@@ -187,23 +189,23 @@ int perform_experiment(int& myRank, int& nRanks, int* d_buffer, ncclComm_t& comm
         
         // Print performance summary
         std::cout << "\nPerformance Summary (Rank 0):" << std::endl;
-        std::cout << "  NCCL Broadcast time: " << nccl_broadcast_time_ms << " ms" << std::endl;
-        std::cout << "  Wall Broadcast time: " << broadcast_time << " seconds" << std::endl;
-        std::cout << "  NCCL Kernel execution: " << nccl_kernel_time_ms << " ms" << std::endl;
-        std::cout << "  Wall Kernel execution: " << kernel_time << " seconds" << std::endl;
-        std::cout << "  NCCL Reduce operation: " << nccl_reduce_time_ms << " ms" << std::endl;
-        std::cout << "  Wall Reduce operation: " << reduce_time << " seconds" << std::endl;
+        std::cout << "  NCCL Broadcast time: " << ncclBroadcastTimeMS << " ms" << std::endl;
+        std::cout << "  Wall Broadcast time: " << broadcastTime << " seconds" << std::endl;
+        std::cout << "  NCCL Kernel execution: " << ncclKernelTimeMS << " ms" << std::endl;
+        std::cout << "  Wall Kernel execution: " << kernelTime << " seconds" << std::endl;
+        std::cout << "  NCCL Reduce operation: " << ncclReduceTimeMS << " ms" << std::endl;
+        std::cout << "  Wall Reduce operation: " << reduceTime << " seconds" << std::endl;
         std::cout << "  Total data size: " << NUMBER_OF_GiB_TO_SEND << " GiB (" << TOTAL_ELEMENTS << " integers)" << std::endl;
         std::cout << std::endl;
 
         if (!warmup) {  // print CSV data to stderr
-            std::cerr << nccl_broadcast_time_ms << ","  << broadcast_time << "," << nccl_kernel_time_ms << "," << kernel_time << "," << nccl_reduce_time_ms << "," << reduce_time << ',' << TOTAL_BYTES << std::endl; 
+            std::cerr << ncclBroadcastTimeMS << ","  << broadcastTime << "," << ncclKernelTimeMS << "," << kernelTime << "," << ncclReduceTimeMS << "," << reduceTime << ',' << TOTAL_BYTES << std::endl; 
         }
 
         std::cout << "------------------------------------------------------------------------" << std::endl;
 
         free(h_result);
-        CUDA_CHECK(cudaFree(d_result));
+        CUDA_CHECK(cudaFree(deviceResults));
         CUDA_CHECK(cudaEventDestroy(startEvent));
         CUDA_CHECK(cudaEventDestroy(stopEvent));
 
@@ -221,8 +223,8 @@ int main(int argc, char* argv[]) {
        
     // Set device to local rank
     // Each process outputs its local GPU setup
-    int device_count;
-    cudaGetDeviceCount(&device_count);
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
        
     // Only rank 0 prints general information
     if (myRank == 0) {
@@ -231,22 +233,22 @@ int main(int argc, char* argv[]) {
         std::cout << "  - Total size: " << NUMBER_OF_GiB_TO_SEND << " GiB (" << TOTAL_BYTES << " bytes)" << std::endl;
         std::cout << "  - Element size: " << BYTES_PER_INT << " bytes" << std::endl;
         std::cout << "  - Number of elements: " << TOTAL_ELEMENTS << std::endl;
-        std::cout << "  - Number of GPUs on node: " << device_count << std::endl;
+        std::cout << "  - Number of GPUs on node: " << deviceCount << std::endl;
     }
 
-    // Select GPU based on local rank (assuming one GPU per process)
-    int local_rank = 0;
-    local_rank = myRank % device_count;
-    CUDA_CHECK(cudaSetDevice(local_rank));
+    // Select GPU based on node-local rank (assuming one GPU per process)
+    int localRank = 0;
+    localRank = myRank % deviceCount;
+    CUDA_CHECK(cudaSetDevice(localRank));
 
     // Get GPU properties
     cudaDeviceProp prop;
-    cudaGetDeviceProperties(&prop, local_rank);
+    cudaGetDeviceProperties(&prop, localRank);
 
     char hostname[HOST_NAME_MAX + 1];
     gethostname(hostname, HOST_NAME_MAX + 1);
 
-    std::cout << "Process " << myRank << " using GPU " << local_rank 
+    std::cout << "Process " << myRank << " using GPU " << localRank 
               << " (" << prop.name << ") on node " << hostname << std::endl;
     
     // Initialize NCCL
@@ -271,8 +273,8 @@ int main(int argc, char* argv[]) {
     printf("ncclCommInitRank completed\n");
     
     // Allocate device memory
-    int *d_buffer;
-    CUDA_CHECK(cudaMalloc(&d_buffer, TOTAL_BYTES));
+    int *deviceBuffer;
+    CUDA_CHECK(cudaMalloc(&deviceBuffer, TOTAL_BYTES));
     printf("Allocated DeviceBuffer\n");
        
     // Create CUDA stream
@@ -286,7 +288,7 @@ int main(int argc, char* argv[]) {
     
     int retval = 0;
     for (int i = 0; i < NO_WARMUP_RUNS; i++) {
-        retval = perform_experiment(myRank, nRanks, d_buffer, comm, stream, true);
+        retval = perform_experiment(myRank, nRanks, deviceBuffer, comm, stream, true);
         if (retval)
             return retval;
     }
@@ -297,13 +299,13 @@ int main(int argc, char* argv[]) {
     }
 
     for (int i = 0; i < NO_EXPERIMENT_RUNS; i++) {
-        retval = perform_experiment(myRank, nRanks, d_buffer, comm, stream, false);
+        retval = perform_experiment(myRank, nRanks, deviceBuffer, comm, stream, false);
         if (retval)
             return retval;
     }
    
     // Clean up
-    CUDA_CHECK(cudaFree(d_buffer));
+    CUDA_CHECK(cudaFree(deviceBuffer));
     CUDA_CHECK(cudaStreamDestroy(stream));
     NCCL_CHECK(ncclCommDestroy(comm));
     
