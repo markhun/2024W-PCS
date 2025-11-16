@@ -38,7 +38,7 @@ This will install all necessary dependencies.
   
 E.g. via executing `make clean; make simple_mpi_bounce_buffer` in `./simple_mpi_bounce_buffer`.  
 
-### 4. Apply the following `firewalld` rules on all nodes:
+### 4. Apply the following `firewalld` rules on all nodes.
   
 ```
     sudo firewall-cmd --zone=trusted --add-source=10.0.0.0/8
@@ -49,7 +49,7 @@ E.g. via executing `make clean; make simple_mpi_bounce_buffer` in `./simple_mpi_
 
 This will ensure local network connectivity within the shared network provided by Chameleon Cloud.
 
-### 5. Set up the experiment parameters
+### 5. Set up the experiment parameters.
 
 Each experiment contains its own `Makefile` with targets to build and execute the experiment:  
   
@@ -59,7 +59,7 @@ Each experiment contains its own `Makefile` with targets to build and execute th
 Modify the experiment's `Makefile` with the correct values for `HOSTS` and `SLOTS`.  
 `HOSTS` should contain a comma separated list of IP addresses of every node that should be part of the experiment (excluding the main node - localhost). `SLOTS` should contain the number of processes to start per node. This should ideally be the number of GPUs per node.
 
-### 6. Execute the experiment
+### 6. Execute the experiment.
 
 To execute an experiment on a single node simply run `make local_run`.  
   
@@ -69,7 +69,7 @@ This will use cluster shell (`clush`) to copy the compiled experiment to every n
 Then `mpirun` is used to start the experiment on every node.
 The run will generate a measurement data file of the format `data_$(RUN_DATETIME).csv` and an additional text file containing the stdout output of the run of the format `output_$(RUN_DATETIME).txt`. The stdout output is also shown on screen while running.  
 
-### 7. Inspect results
+### 7. Inspect results.
 
 Each experiment will write two text files. A file containing the measurement results in CSV format and a file containing the logging output of the run as a simple text file. Both files will contain the date and time of the run within their respective file names:
 
